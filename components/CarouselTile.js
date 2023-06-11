@@ -3,21 +3,20 @@ import { Image, StyleSheet, Text, View } from "react-native";
 
 const CarouselTile = (props) => {
   const data = props.data;
-  const focused = props.focused;
 
   return (
     <View style={styles.carouselTile}>
       <Image
         source={require(`../assets/${data.image}`)}
-        style={{ width: 80, height: 80 }}
+        style={{ width: 100, height: 100 }}
       />
       <Text
         style={{
-          width: 80,
+          width: 100,
           fontSize: 10,
         }}
       >
-        {data.title}
+        {data.name}
       </Text>
     </View>
   );

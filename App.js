@@ -1,19 +1,175 @@
 import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Dimensions,
+  ScrollView,
+  Image,
+} from "react-native";
 import React, { useState } from "react";
 import Carousel from "./components/Carousel";
+import MultiSelector from "./components/MultiSelector";
 
-const recipes = [
-  { id: 1, title: "Spaghetti Bolognese", image: "spag.jpg" },
-  { id: 2, title: "Fettucine Bolognese", image: "spag.jpg" },
-  { id: 3, title: "Rigatoni Bolognese", image: "spag.jpg" },
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
+
+const FIELDS = [
+  "id",
+  "name",
+  "image",
+  "ingredients",
+  "instructions",
+  "totaltime",
+  "tags",
 ];
 
+const RECIPES = [
+  {
+    id: 1,
+    name: "Fiorentina Steak",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Dinner", "Meat", "Italian"],
+  },
+  {
+    id: 2,
+    name: "Sandwich",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Lunch", "Meat", "Vegetarian"],
+  },
+  {
+    id: 3,
+    name: "Udon",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Pasta", "Japanese", "Vegetarian", "Dinner"],
+  },
+  {
+    id: 4,
+    name: "Tiramisu",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Dessert", "Italian", "Vegan", "Vegetarian"],
+  },
+  {
+    id: 5,
+    name: "Spaghetti Bolognese",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Dinner", "Pasta", "Italian", "Meat"],
+  },
+  {
+    id: 6,
+    name: "Dumplings",
+    image: "spag.jpg",
+    ingredients: ["a", "b", "c"],
+    instructions: "Longer than this text",
+    totaltime: "1.15",
+    tags: ["Lunch", "Japanese", "Freeze", "Vegetarian", "Meat"],
+  },
+];
+
+const TAGS = RECIPES.map((recipe) => recipe.tags)
+  .flat()
+  .filter((v, i, a) => a.indexOf(v) == i);
+
+const recipesByTag = {};
+
+TAGS.map((tag) => {
+  const taggedRecipes = [];
+  RECIPES.forEach((recipe) => {
+    if (recipe.tags.includes(tag)) taggedRecipes.push(recipe);
+  });
+  recipesByTag[tag] = taggedRecipes;
+});
+
 const App = () => {
+  const [listFields, setListFields] = useState(["image", "name"]);
+  const [view, setView] = useState("carousel");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
+
+  const handleTagSelection = (tag) => {
+    const tags = [...selectedTags];
+    const index = tags.indexOf(tag);
+    const newSelectedTags =
+      index >= 0
+        ? [...tags.slice(0, index), ...tags.slice(index + 1, -1)]
+        : [...tags, tag];
+
+    // Update list of recipes that have include all tags
+    const newFilteredRecipes = [];
+    const recipes = filteredRecipes.length ? [...filteredRecipes] : RECIPES;
+    recipes.forEach((recipe) => {
+      let hasAllTags = newSelectedTags.every((tag) => {
+        if (!recipe.tags.includes(tag)) return false;
+        return true;
+      });
+      if (hasAllTags) newFilteredRecipes.push(recipe);
+    });
+    console.log(newSelectedTags);
+    console.log(newFilteredRecipes);
+    setSelectedTags(newSelectedTags);
+    setFilteredRecipes(newFilteredRecipes);
+  };
+
   return (
     <View style={styles.container}>
       <Text>Welcome to TasteBuds</Text>
-      <Carousel data={recipes} />
+      <MultiSelector items={TAGS} handler={handleTagSelection} />
+      {view === "carousel" ? (
+        <View>
+          {selectedTags.length > 1 ? (
+            <Carousel items={filteredRecipes} title={selectedTags.join(", ")} />
+          ) : undefined}
+          {selectedTags.map((tag, idx) => (
+            <Carousel items={recipesByTag[tag]} key={idx} title={tag} />
+          ))}
+          <Carousel items={RECIPES} title={"All Recipes"} />
+        </View>
+      ) : view === "list" ? (
+        <ScrollView>
+          {(filteredRecipes.length ? filteredRecipes : RECIPES).map(
+            (recipe) => (
+              <View style={styles.listrow} key={recipe.id}>
+                {listFields.map((field, idx) => (
+                  <View style={styles.listitem} key={`${recipe.index}-${idx}`}>
+                    {field === "image" ? (
+                      <Image
+                        source={require(`./assets/${recipe.image}`)}
+                        style={{ width: 40, height: 40, flex: 1 }}
+                      />
+                    ) : (
+                      <Text
+                        style={{
+                          width: "fit-content",
+                          flex: 3,
+                        }}
+                      >
+                        {recipe[field]}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )
+          )}
+        </ScrollView>
+      ) : undefined}
     </View>
   );
 };
@@ -21,7 +177,9 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
+    display: "flex",
+    justifyContent: "flex-start",
+    maxWidth: windowWidth,
   },
   ...Platform.select({
     ios: {
@@ -31,6 +189,20 @@ const styles = StyleSheet.create({
       fontFamily: "Roboto",
     },
   }),
+  listrow: {
+    paddingHorizontal: 30,
+    height: 40,
+    display: "flex",
+    flexDirection: "row",
+    columnGap: 15,
+    rowGap: 15,
+    justifyContent: "flex-start",
+    alignContent: "center",
+    borderWidth: 1,
+  },
+  listitem: {
+    display: "flex",
+  },
 });
 
 export default App;

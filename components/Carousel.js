@@ -1,37 +1,29 @@
 import React, { useState } from "react";
 import CarouselTile from "./CarouselTile";
-import { Button, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const Carousel = (props) => {
-  const [index, setIndex] = useState(0);
-  const length = props.data.length;
-  const items = props.data;
-
-  const handlePrevious = () => {
-    const newIndex = index - 1;
-    setIndex(newIndex < 0 ? length - 1 : newIndex);
-  };
-
-  const handleNext = () => {
-    const newIndex = index + 1;
-    setIndex(newIndex >= length ? 0 : newIndex);
-  };
+  const items = props.items;
 
   return (
-    <View style={styles.carouselContainer}>
-      <Button onPress={handlePrevious}>Previous</Button>
-      <View style={styles.carousel}>
-        {items.map((item, idx) => (
-          <CarouselTile data={item} focused={idx === index} key={item.id} />
-        ))}
+    <View>
+      <Text style={styles.header}>{props.title}</Text>
+      <View style={styles.carouselContainer}>
+        <ScrollView style={styles.carousel} horizontal={true}>
+          {items.length ? (
+            items.map((item) => <CarouselTile data={item} key={item.id} />)
+          ) : (
+            <Text>No recipes found.</Text>
+          )}
+        </ScrollView>
       </View>
-      <Button onPress={handleNext}>Next</Button>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   carouselContainer: {
+    flex: 1,
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -47,6 +39,9 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "absolute",
     width: 20,
+  },
+  header: {
+    fontWeight: "bold",
   },
 });
 
