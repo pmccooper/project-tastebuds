@@ -1,13 +1,16 @@
 import { StatusBar } from "expo-status-bar";
 import {
   Platform,
+  Modal,
+  Button,
   StyleSheet,
   Text,
-  TextInput,
   View,
   Dimensions,
   ScrollView,
+  Form,
   Image,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import Carousel from "./components/Carousel";
@@ -102,6 +105,7 @@ const App = () => {
   const [view, setView] = useState("carousel");
   const [selectedTags, setSelectedTags] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleTagSelection = (tag) => {
     const tags = [...selectedTags];
@@ -130,6 +134,28 @@ const App = () => {
   return (
     <View style={styles.container}>
       <Text>Welcome to TasteBuds</Text>
+      <Modal
+        style={styles.modal}
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() =>{
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.container}>
+          <Pressable
+            onPress={() => setModalVisible(!modalVisible)}>
+            <Text>Save</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setModalVisible(!modalVisible)}>
+            <Text>Hide</Text>
+          </Pressable>
+        </View>  
+      </Modal>
+      <Pressable
+      onPress={() =>setModalVisible(true)}>
+        <Text>Show</Text>
+      </Pressable>
       <MultiSelector items={TAGS} handler={handleTagSelection} />
       {view === "carousel" ? (
         <View>
@@ -139,7 +165,7 @@ const App = () => {
           {selectedTags.map((tag, idx) => (
             <Carousel items={recipesByTag[tag]} key={idx} title={tag} />
           ))}
-          <Carousel items={RECIPES} title={"All Recipes"} />
+          <Carousel items={RECIPES} title={"All Recipes"} />          
         </View>
       ) : view === "list" ? (
         <ScrollView>
@@ -202,6 +228,18 @@ const styles = StyleSheet.create({
   },
   listitem: {
     display: "flex",
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  modal: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
   },
 });
 
