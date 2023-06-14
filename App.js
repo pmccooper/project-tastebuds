@@ -100,6 +100,32 @@ TAGS.map((tag) => {
   recipesByTag[tag] = taggedRecipes;
 });
 
+function form() {
+  return(
+      <div classname="form">
+          <h2>Create a Recipe</h2>
+              <form>
+                <br></br>
+                  <label>Title</label>
+                  <input type="text"
+                   required
+                  />                  
+                <br></br>
+                  <label>Ingredients</label>
+                  <input type="text"
+                   required
+                  />
+                 <br></br>
+                  <label>Directions</label>
+                  <input type="text"
+                   required
+                  /> 
+              </form>
+      </div>
+      
+  );
+}
+
 const App = () => {
   const [listFields, setListFields] = useState(["image", "name"]);
   const [view, setView] = useState("carousel");
@@ -150,11 +176,31 @@ const App = () => {
             onPress={() => setModalVisible(!modalVisible)}>
             <Text>Hide</Text>
           </Pressable>
+          <div classname="form">
+            <h2>Create a Recipe</h2>
+              <form>
+                <br></br>
+                  <label>Title</label>
+                  <input type="text"
+                   required
+                  />                  
+                <br></br>
+                  <label>Ingredients</label>
+                  <input type="text"
+                   required
+                  />
+                 <br></br>
+                  <label>Directions</label>
+                  <input type="text"
+                   required
+                  /> 
+              </form>
+          </div>
         </View>  
       </Modal>
       <Pressable
       onPress={() =>setModalVisible(true)}>
-        <Text>Show</Text>
+        <Text>Create New Recipe</Text>
       </Pressable>
       <MultiSelector items={TAGS} handler={handleTagSelection} />
       {view === "carousel" ? (
